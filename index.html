@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethik-Wizard: Welcher moralische Grundtyp bist du?</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+
+        :root {
+            --primary: #2c3e50; /* Dunkles Schiefergrau für Überschriften */
+            --secondary: #596275; /* Gedämpftes Blaugrau für sekundäre Elemente */
+            --accent: #457b9d; /* Seriöses, akademisches Graublau statt grellem Hellblau */
+            --util: #d35400; /* Kräftigeres, dunkleres Orange */
+            --deo: #27ae60; 
+            --obj: #8e44ad; 
+            --bg: #edeae3; /* Warmes, helles Grau-Beige für den Seitenhintergrund */
+            --surface: #fcfbf9; /* Papier-Weiß für die Hauptkarte (angenehmer als reines Weiß) */
+            --surface-alt: #f3f0e9; /* Etwas dunkleres Beige für abgesetzte Boxen */
+            --text: #333333;
+            --border: #dcd9d4; /* Weichere Rahmenfarbe */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            /* Extra Platz unten, damit die Leiste nichts Wichtiges verdeckt */
+            padding-bottom: 120px; 
+        }
+
+        .container {
+            background-color: var(--surface);
+            max-width: 800px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(44, 62, 80, 0.08); /* Weicherer, kühlerer Schatten */
+            border: 1px solid #e8e5df; /* Sehr feiner Rand für eine klare Kante */
+            padding: 40px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* Screens */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover { background-color: #2980b9; }
+        .btn:active { transform: scale(0.98); }
+        .btn-start { width: auto; font-size: 18px; padding: 15px 30px; }
+
+        /* NEU: Skip Button */
+        .btn-skip { 
+            background-color: transparent;
+            color: #7f8c8d;
+            border: 1px solid #bdc3c7;
+            margin-top: 10px;
+        }
+        .btn-skip:hover {
+            background-color: #f1f2f6;
+            color: #333;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            height: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Quiz Elements */
+        .dilemma-meta { font-size: 0.9em; color: #7f8c8d; margin-bottom: 10px; }
+        .dilemma-context { font-size: 1.1em; margin-bottom: 30px; padding: 18px; background-color: var(--surface-alt); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; color: #2c3e50; }
+        
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn {
+            background-color: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+            text-align: left;
+            padding: 15px 20px;
+            font-size: 1em;
+            line-height: 1.4;
+            margin-bottom: 0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover { border-color: var(--accent); background-color: #f8f6f1; }
+        .option-btn.selected { border-color: var(--accent); background-color: #eff3f6; font-weight: bold; border-width: 2px; box-shadow: 0 2px 8px rgba(69, 123, 157, 0.15); }
+        .option-btn.dimmed { opacity: 0.4; filter: grayscale(100%); }
+
+        /* NEU: Sticky Bottom Panel (Horizontal 1-5) */
+        .bottom-panel {
+            position: fixed;
+            bottom: -150%;
+            left: 0;
+            width: 100%;
+            background-color: #fcfbf9; /* Gleiches Papier-Weiß wie die Hauptkarte */
+            box-shadow: 0 -8px 30px rgba(44, 62, 80, 0.12); /* Etwas edlerer Schatten */
+            padding: 20px 10px 30px 10px;
+            z-index: 1000;
+            transition: bottom 0.3s ease-out; /* Seriöser, zügiger und flacher Übergang */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .bottom-panel.active {
+            bottom: 0;
+        }
+        .bottom-panel-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .scale-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 650px; /* Etwas mehr Platz für die Ausbreitung */
+            gap: 15px; /* Deutlich mehr Abstand zwischen den Buttons */
+        }
+        .scale-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .scale-item:hover { background-color: var(--surface-alt); }
+        .scale-item:active { transform: scale(0.95); }
+        .scale-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .scale-label {
+            font-size: 0.85em; /* Schriftgröße sichtbar erhöht */
+            text-align: center;
+            color: #444;
+            line-height: 1.3; /* Zeilenabstand minimal erhöht für bessere Lesbarkeit */
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+        
+        /* Farben der Kreise */
+        .c1 { background-color: #e74c3c; } /* Rot */
+        .c2 { background-color: #e67e22; } /* Orange */
+        .c3 { background-color: #f1c40f; } /* Gelb */
+        .c4 { background-color: #2ecc71; } /* Hellgrün */
+        .c5 { background-color: #27ae60; } /* Dunkelgrün */
+
+        /* Results */
+        .result-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+        .result-util { background-color: var(--util); }
+        .result-deo { background-color: var(--deo); }
+        .result-obj { background-color: var(--obj); }
+
+        .score-bar-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px; /* Abstand verringert */
+        }
+        .score-label { width: 170px; font-weight: bold; font-size: 0.85em; } /* Schrift kleiner */
+        .score-track {
+            flex-grow: 1;
+            background-color: #eee;
+            height: 12px; /* Balken schmaler */
+            border-radius: 6px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        .score-fill { height: 100%; transition: width 1s ease-in-out; }
+        .score-fill.util { background-color: var(--util); }
+        .score-fill.deo { background-color: var(--deo); }
+        .score-fill.obj { background-color: var(--obj); }
+        .score-value { width: 50px; text-align: right; font-weight: bold; font-size: 0.85em; }
+
+        /* Breakdown Details */
+        details {
+            margin-top: 30px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        summary { font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .breakdown-item {
+            border-bottom: 1px solid #ccc;
+            padding: 15px 0;
+            font-size: 0.95em;
+        }
+        .breakdown-item:last-child { border-bottom: none; }
+        .score-badge { display: inline-block; border-radius: 4px; color: white; margin-right: 5px; margin-top: 5px; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 20px; margin-top: 0; border-radius: 0; box-shadow: none; }
+            .score-bar-container { flex-direction: column; align-items: flex-start; }
+            .score-label { width: 100%; margin-bottom: 5px; }
+            .score-track { width: 100%; margin: 0 0 5px 0; }
+            .score-value { width: 100%; text-align: left; }
+            
+            /* Anpassung für kleine Handys */
+            .scale-circle { width: 40px; height: 40px; font-size: 1.1em; }
+            .scale-label { font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="intro-screen" class="screen active">
+        <h1>Der Ethik-Wizard</h1>
+        <p><strong>Welchen moralischen Grundtyp vertreten Sie?</strong></p>
+        <br>
+        <p>In der Informatik und im Alltag reicht es nicht, Regeln nur theoretisch zu kennen – man muss Handlungsentscheidungen treffen und diese begründen können. Dieser Wizard testet Ihre moralische Intuition anhand von 15 Dilemmata.</p>
+        <br>
+        <p><strong>Die Methode:</strong> Sie wählen zunächst eine Handlung aus. Danach geben Sie auf einer Skala an, <em>wie sicher</em> Sie sich bei dieser Entscheidung sind. Eine starke Überzeugung wiegt in der Auswertung schwerer als eine unsichere Entscheidung.</p>
+        <br><br>
+        <div style="text-align: center;">
+            <button class="btn btn-start" onclick="startQuiz()">Wizard starten</button>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div class="dilemma-meta" id="dilemma-meta">Frage 1 von 15</div>
+        <h2 id="dilemma-title">Titel</h2>
+        <div class="dilemma-context" id="dilemma-context">Kontext Text...</div>
+        
+        <div class="options-container" id="options-container">
+            </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h1>Ihr ethisches Profil</h1>
+        
+        <div id="winner-box" class="result-box">
+            <h2 style="color: white; margin-bottom: 10px;" id="winner-title">Typ</h2>
+            <p id="winner-desc">Beschreibung</p>
+        </div>
+
+        <div id="skip-analysis-container"></div>
+
+        <h3>Punkteverteilung</h3>
+        
+        <div id="score-bars">
+            </div>
+
+        <!-- NEU: Platz für Radar Chart -->
+        <div style="width: 100%; max-width: 450px; margin: 5px auto 10px auto;">
+            <canvas id="radarChart"></canvas>
+        </div>
+
+        <details>
+            <summary>Methodik und Gewichtung ansehen</summary>
+            <div style="font-size: 0.9em; color: #444; line-height: 1.5; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 10px;">
+                <h4 style="margin-bottom: 5px; color: var(--primary);">1. Trennschärfe der Fragen (Gewicht 1-3)</h4>
+                <p style="margin-bottom: 10px;">Gibt an, wie stark die Situation zwischen den Philosophien differenziert (z.B. Gewicht 3 = klassische harte Dilemmata).</p>
+
+                <h4 style="margin-bottom: 5px; color: var(--primary);">2. Scoring pro Antwort (0-3 Punkte)</h4>
+                <p style="margin-bottom: 10px;">3 Punkte = Kernposition; 1 Punkt = partielle Übereinstimmung; 0 Punkte = Widerspruch.</p>
+
+                <h4 style="margin-bottom: 5px; color: var(--primary);">3. Der Überzeugungsfaktor (Faktor 1-5)</h4>
+                <p style="margin-bottom: 10px;">Bewertet die Gewissheit der Entscheidung. Eine kompromisslose Entscheidung (Faktor 5) prägt das moralische Profil deutlich stärker als eine Entscheidung, die nur als „kleinstes Übel“ (Faktor 1) getroffen wurde.</p>
+
+                <h4 style="margin-bottom: 5px; color: var(--primary);">Berechnung des Endergebnisses</h4>
+                <p style="margin-bottom: 5px; font-family: monospace; background: #eef; padding: 5px; display: inline-block; border-radius: 4px;">Punkte = Antwort-Score × Trennschärfe × Überzeugungsfaktor</p>
+                <p>Die Philosophie mit der höchsten Gesamtpunktzahl dominiert. Bei Gleichstand entscheidet die Performance in den schwierigen Dilemmata (Gewicht 3).</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>Detaillierte Auswertung pro Frage ansehen</summary>
+            <div id="breakdown-list">
+                </div>
+        </details>
+
+        <div style="margin-top: 30px; background-color: #fcf9f2; border-left: 4px solid #e67e22; padding: 15px; border-radius: 8px; font-size: 0.9em; color: #555;">
+            <h4 style="margin-bottom: 10px; color: #d35400; margin-top:0;">Grenzen & Hinweise</h4>
+            <p style="margin-bottom: 10px;">Dieser Test bietet eine <strong>vereinfachte Einordnung</strong>. Ethische Überzeugungen sind in der Realität selten rein einer Philosophie zuzuordnen. Die meisten Menschen vertreten situationsabhängig verschiedene Positionen.</p>
+            <p><strong>Mögliche Fehlklassifikationen:</strong> Antworten können aus verschiedenen Motivationen gewählt werden. Jemand, der utilitaristisch antwortet, könnte dies aus deontologischen Gründen tun (z.B. „Pflicht zur Leidminimierung"). Die Formulierungen versuchen dies zu minimieren, können es aber nicht völlig ausschließen.</p>
+        </div>
+
+        <br><br>
+        <div style="text-align: center;">
+            <button class="btn" style="width: auto;" onclick="resetQuiz()">Quiz wiederholen</button>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-panel" id="bottom-panel">
+    <div class="bottom-panel-title">Wie sicher sind Sie sich bei dieser Entscheidung?</div>
+    <div class="scale-row">
+        <button class="scale-item" onclick="submitAnswer(1)">
+            <div class="scale-circle c1">1</div>
+            <div class="scale-label">Sehr<br>unsicher</div>
+        </button>
+        <button class="scale-item" onclick="submitAnswer(2)">
+            <div class="scale-circle c2">2</div>
+            <div class="scale-label">Eher<br>unsicher</div>
+        </button>
+        <button class="scale-item" onclick="submitAnswer(3)">
+            <div class="scale-circle c3">3</div>
+            <div class="scale-label">Teils,<br>teils</div>
+        </button>
+        <button class="scale-item" onclick="submitAnswer(4)">
+            <div class="scale-circle c4">4</div>
+            <div class="scale-label">Ziemlich<br>sicher</div>
+        </button>
+        <button class="scale-item" onclick="submitAnswer(5)">
+            <div class="scale-circle c5">5</div>
+            <div class="scale-label">Völlig<br>überzeugt</div>
+        </button>
+    </div>
+</div>
+
+<script>
+    // JSON Data
+    const dilemmas = [
+        {
+          "id": 1, "title": "Die Tochter des Terroristen", "weight": 3,
+          "context": "Angenommen, ein Terrorist hat eine Bombe versteckt, die 1000 Menschen in den Tod reißen würde. Darf man die fünfjährige Tochter des Terroristen foltern, um sein Geständnis zu erzwingen und die Bombe ausfindig zu machen? Man hat guten Grund zur Annahme, dass die Folter der Tochter den Terroristen zur Aussage bewegen wird. Eine andere Alternative ist nicht in Sicht.",
+          "options": [
+            { "text": "Ja, das Überleben einer großen Anzahl von Menschen rechtfertigt in diesem extremen Notfall das Leid eines Einzelnen.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
+            { "text": "Nein, es ist grundsätzlich unzulässig, ein unschuldiges Kind zu quälen, unabhängig von den drohenden Konsequenzen.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Nein, eine solche Tat lässt sich rational nicht rechtfertigen, da sie die logische Basis eines gerechten Zusammenlebens zerstört.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 2, "title": "Der Organ-Raub", "weight": 3,
+          "context": "Stellen Sie sich vor, Sie sind Chirurgin oder Chirurg. Vor Ihnen liegen fünf Patienten: Der eine braucht dringend ein Herz, zwei einen Lungenflügel und zwei eine Niere. Alle fünf haben dieselbe seltene Blutgruppe. Genau in diesem Moment spaziert ein kerngesunder Mann in die Klinik, der die richtige Blutgruppe hat. Sie könnten den jungen Mann schmerzlos töten, seine Organe entnehmen und den fünf Patienten das Leben retten. Ist es moralisch richtig?",
+          "options": [
+            { "text": "Ja, rechnerisch werden durch dieses Opfer mehr Menschenleben erhalten als vernichtet.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
+            { "text": "Nein, ein Mensch darf niemals lediglich als Mittel zur Rettung anderer benutzt werden; das verletzt seine Würde.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Nein, ein Medizinsystem, das Individuen willkürlich opfert, ist in sich widersprüchlich und vernünftig nicht haltbar.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 3, "title": "Die Notapotheke", "weight": 1,
+          "context": "Angenommen, Sie sind sehr arm und leben in einem Staat ohne Grundversicherung. Ihrer Familie geht es gesundheitlich sehr schlecht: Die beiden Kinder leiden an einer schweren Lungenentzündung und brauchen dringend Antibiotika. Sie sehen keinen anderen Weg als den Diebstahl. Ist es moralisch vertretbar, eine Apotheke zu überfallen?",
+          "options": [
+            { "text": "Ja, die physische Gesundheit der Kinder stellt den höheren Wert gegenüber dem finanziellen Schaden dar.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Nein, Diebstahl bleibt ein Verstoß gegen geltende Regeln, die für alle gleichermaßen verbindlich sein müssen.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
+            { "text": "Ja, in diesem speziellen Fall ist die Hilfeleistung die sachlich überzeugendere Verpflichtung gegenüber dem Eigentumsschutz.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 4, "title": "Das entführte Flugzeug", "weight": 3,
+          "context": "Ein Passagierflugzeug wurde von Terroristen entführt und fliegt direkt auf ein bewohntes Hochhaus inmitten einer größeren Stadt zu. Darf man das Flugzeug abschießen?",
+          "options": [
+            { "text": "Ja, man muss den Tod einer weitaus größeren Menschenmenge im Gebäude verhindern.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
+            { "text": "Nein, man darf unschuldige Passagiere nicht aktiv töten, da sie nicht zum bloßen Objekt degradiert werden dürfen.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Ja, da in dieser extremen Situation der Schutz der Bewohner die sachlich überzeugendere Verpflichtung darstellt, die als objektive moralische Wahrheit rationaler Kritik standhält.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 5, "title": "Die Straßensperre", "weight": 1,
+          "context": "Sie transportieren lebensnotwendige Medikamente in einem Bürgerkriegsland. Eine bewaffnete Straßensperre verlangt 1000 Franken für die Durchfahrt. Das Geld fließt an einen kriegstreibenden Diktator. Die Medikamente werden dringend benötigt. Was ist richtig?",
+          "options": [
+            { "text": "Ich zahle, da die direkte Hilfe für die Notleidenden den finanziellen Gewinn des Machthabers überwiegt.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Ich zahle nicht, da ich durch mein Handeln keine korrupten und menschenverachtenden Systeme unterstützen darf.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
+            { "text": "Ja, ich zahle. In diesem speziellen Fall ist die Hilfeleistung die sachlich überzeugendere Wahrheit, die vor der Vernunft schwerer wiegt als das Verbot der Korruption.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 6, "title": "Das Trolley-Problem", "weight": 3,
+          "context": "Ein außer Kontrolle geratener Zug rast auf fünf Gleisarbeiter zu. Du stehst an einer Weiche und könntest den Zug auf ein Nebengleis umleiten, auf dem jedoch eine einzelne Person steht. Die fünf Arbeiter würden gerettet, die eine Person würde sterben. Was würden Sie tun?",
+          "options": [
+            { "text": "Ich leite den Zug um, um die Anzahl der Opfer statistisch so gering wie möglich zu halten.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Ich greife nicht ein, da ich nicht aktiv über den Tod eines Menschen entscheiden darf, um andere zu retten.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
+            { "text": "Ja, ich lege den Hebel um. Es ist eine objektive Einsicht, dass das Handeln in dieser Notlage vernünftiger ist, da die Rettung der Menschenleben eine sachlich begründete Verpflichtung darstellt.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 7, "title": "Die Brücke", "weight": 3,
+          "context": "Ein führungsloser Zug rast auf fünf Gleisarbeiter zu. Sie stehen auf einer Fußgängerbrücke neben einem sehr schweren Mann. Die einzige Möglichkeit, den Zug zu stoppen, besteht darin, diesen Mann auf die Gleise zu stoßen. Sein Gewicht stoppt den Zug, er stirbt aber. Werden Sie ihn stoßen?",
+          "options": [
+            { "text": "Ja, da fünf gerettete Leben eine objektiv bessere Bilanz darstellen als ein verlorenes Leben.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
+            { "text": "Nein, einen Unbeteiligten aktiv in den Tod zu stoßen, ist eine Grenze, die niemals überschritten werden darf.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Nein, ich lehne das ab. In diesem Fall spricht schlichtweg zu viel gegen das Opfer eines Einzelnen, als dass man es als die richtige Entscheidung ansehen könnte.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 8, "title": "Der lügende Arzt", "weight": 1,
+          "context": "Ein Patient hat eine tödliche Krankheit. Die Wahrheit würde ihn in tiefe Depression stürzen. Eine Lüge könnte ihm ein friedlicheres Ende ermöglichen. Sagen Sie ihm die Wahrheit?",
+          "options": [
+            { "text": "Ja (lügen), wenn die Lüge nachweislich zu weniger Leid und einem besseren psychischen Befinden führt.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
+            { "text": "Nein (Wahrheit), Wahrhaftigkeit ist eine Pflicht gegenüber dem Patienten, die man nicht nach eigenem Ermessen brechen darf.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Ich sage ihm die Wahrheit, weil er nur so rational über sein verbleibendes Leben entscheiden kann. Es ist sein Leben, nicht meines.", "scores": { "util": 0, "deo": 2, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 9, "title": "Steuern und Umverteilung", "weight": 2,
+          "context": "Die Regierung plant Steuererhöhungen für Spitzenverdiener für KI-gestützte Sozialprogramme zur Armutsreduzierung. Kritiker sehen einen Eingriff in das Eigentumsrecht. Ist die Maßnahme gerechtfertigt?",
+          "options": [
+            { "text": "Ja, die signifikante Steigerung des allgemeinen Wohlergehens rechtfertigt den finanziellen Eingriff beim Einzelnen.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Nein, das Recht auf Eigentum darf nicht zur Erreichung sozialer Ziele einfach instrumentalisiert werden.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
+            { "text": "Ja, sofern diese Gerechtigkeit als eine notwendige Bedingung für ein stabiles und vernünftiges Gesellschaftssystem erkannt wird.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 10, "title": "Das Versprechen am Sterbebett", "weight": 1,
+          "context": "Ein sterbender Freund bittet dich, sein Vermögen an eine schädliche Organisation zu spenden. Du hast es versprochen. Nach seinem Tod könntest du das Geld stattdessen einer wohltätigen Organisation geben. Was tun Sie?",
+          "options": [
+            { "text": "Ich nutze es für etwas Gutes, da der reale gesellschaftliche Nutzen wichtiger ist als ein abstraktes Versprechen.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Ich halte das Versprechen, da die Treue zum gegebenen Wort eine moralische Verpflichtung ohne Ausnahme darstellt.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Ich entscheide mich für die gute Organisation, da das Einhalten eines nachweislich schädlichen Versprechens in dieser Situation schlichtweg die falsche Wahl wäre.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 11, "title": "Autonomes Fahrzeug", "weight": 2,
+          "context": "Ethik-Software eines autonomen Fahrzeugs: Bei einem Unfall muss das Auto entscheiden, ob es die Insassen schützt (in Fußgänger steuert) oder die Fußgänger rettet (Insassen gefährdet). Was sollte es tun?",
+          "options": [
+            { "text": "Das System muss die Option wählen, die statistisch die geringste Anzahl an Schwerverletzten zur Folge hat.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Es darf keine Programmierung geben, die aktiv entscheidet, das Leben eines Menschen gegen ein anderes aufzuwiegen.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Das Auto sollte die Fußgänger schützen. Es ist die schlüssigere Wahl, dass diejenigen im Wagen das Risiko tragen und nicht unbeteiligte Personen auf der Straße.", "scores": { "util": 1, "deo": 1, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 12, "title": "Impfpflicht", "weight": 2,
+          "context": "Eine hochansteckende Pandemie bedroht das Gesundheitssystem. Eine staatliche Impfpflicht würde sie beenden, greift aber in die körperliche Selbstbestimmung ein. Sollte sie durchgesetzt werden?",
+          "options": [
+            { "text": "Ja, der Schutz der öffentlichen Gesundheit und die Beendigung der Krise rechtfertigen diesen kollektiven Eingriff.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Nein, die körperliche Selbstbestimmung ist ein Recht, das vom Staat nicht für gemeinschaftliche Zwecke verletzt werden darf.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Ja, ich bin für die Impfpflicht. In einer so kritischen Lage ist der Schutz des Lebens die sachlich richtige Entscheidung, um die Basis für ein sicheres Zusammenleben zu erhalten.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 13, "title": "Gerechte Notlüge in der Diktatur", "weight": 3,
+          "context": "In einer Diktatur versteckst du Verfolgte. Soldaten fragen, ob du jemanden versteckst. Ehrlichkeit bedeutet deren Tod, eine Lüge rettet sie. Belügen Sie die Soldaten?",
+          "options": [
+            { "text": "Ja, das Leben der Unschuldigen zu retten, ist wichtiger als das formale Verbot der Unwahrheit.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Nein, ich sage die Wahrheit. Lügen ist eine Verletzung einer moralischen Grundregel, die man niemals begehen darf.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
+            { "text": "Ja, ich lüge. In dieser extremen Bedrohung ist die Hilfe für die Verfolgten die einzig richtige Entscheidung und stellt hier das sachlich höhere Gut dar.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 14, "title": "Wissenschaftliche Integrität", "weight": 2,
+          "context": "Sie entdecken als Forscher einen Fehler in einem Medikament. Die Veröffentlichung rettet Leben, würde aber die Firma ruinieren und Sie arbeitslos machen. Veröffentlichen Sie den Fehler?",
+          "options": [
+            { "text": "Ja, die Sicherheit der Patienten weltweit ist wichtiger als mein Arbeitsplatz oder der wirtschaftliche Fortbestand der Firma.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
+            { "text": "Ja, Wahrhaftigkeit in der Forschung ist eine unbedingte Pflicht, die völlig unabhängig von den Folgen für mich gilt.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Ja, da wissenschaftliche Erkenntnisse objektiv wahr sein müssen; alles andere wäre ein Verrat an der Vernunft.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
+          ]
+        },
+        {
+          "id": 15, "title": "KI und Arbeitsplätze", "weight": 2,
+          "context": "Ein Unternehmen ersetzt 200 Mitarbeiter durch KI. Die Produktivität verdoppelt sich, aber die Entlassenen finden schwer neue Arbeit. Ist diese Maßnahme gerechtfertigt?",
+          "options": [
+            { "text": "Ja, die massive Steigerung der Effizienz nützt langfristig der Wettbewerbsfähigkeit und somit der gesamten Ökonomie.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
+            { "text": "Nein, man darf Mitarbeiter nicht als bloße Kostenfaktoren entsorgen, sobald eine Technologie effizienter ist.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
+            { "text": "Nein, ich lehne das ab. Es ist die sachlich überzeugendere Wahrheit, dass technischer Fortschritt nur dann sinnvoll ist, wenn er nicht die soziale Basis unserer Zusammenarbeit zerstört.", "scores": { "util": 1, "deo": 1, "obj": 3 } }
+          ]
+        }
+    ];
+
+    let currentIndex = 0;
+    let scores = { util: 0, deo: 0, obj: 0 };
+    let tieBreakerScores = { util: 0, deo: 0, obj: 0 }; 
+    let userHistory = [];
+    let pendingOption = null;
+    let radarChartInstance = null; // NEU: Speichert das Chart-Objekt
+    let skippedCount = 0; // Zählt die Anzahl der übersprungenen Fragen
+
+    const descriptions = {
+        util: { name: "Der Utilitarist (Konsequentialismus)", text: "<strong>Folgenorientierung:</strong> Sie sympathisieren mit dem Utilitarismus. Diese Position behauptet, der moralische Wert einer Handlung bemesse sich allein an ihren Folgen. Wenn Sie also wissen wollen, ob eine Handlung gut ist, dann schauen Sie, was dabei herauskommt. Für die Praxis heisst das: Handle so, dass durch deine Handlung das Glück der Betroffenen maximiert und das Leid minimiert wird. Das grösste Glück für die grösste Zahl – das ist das Ziel der Moral. Dazu kann jedes Mittel recht sein: Der Zweck heiligt die Mittel.", class: "result-util" },
+        deo: { name: "Der Deontologe (Pflichtethik)", text: "<strong>Pflichtethik:</strong> Sie sympathisieren mit der Pflichtethik, auch Deontologie genannt. Gemäss dieser Position besteht der Wert einer Handlung nicht nur in ihren Konsequenzen, sondern in der Handlung selbst. Es gibt Handlungen, die schlecht sind, egal wie viel Gutes dabei herauskommt. Töten, Foltern und Stehlen gehören dazu. Diese Handlungen sind kategorisch falsch und können nicht durch Kosten-Nutzen-Rechnungen aufgewertet werden. Es gibt Dinge, die man nicht tun darf, unter keinen Umständen. Diese moralischen Verbotsschilder schützen unsere Menschenwürde und verhindern, dass unsere Interessen oder unser Leben für das Gemeinwohl geopfert werden.", class: "result-deo" },
+        obj: { name: "Der Ethische Objektivist (Vernunftethik)", text: "<strong>Vernunftethik:</strong> Sie sympathisieren mit dem ethischen Objektivismus. Diese Position geht davon aus, dass moralische Urteile objektiv wahr oder falsch sein können und auf vernünftigen Gründen basieren. Wenn Sie vor einer Entscheidung stehen, wenden Sie weder stur starre Regeln an, noch verrechnen Sie Menschenleben in einer bloßen Kosten-Nutzen-Bilanz. Vielmehr prüfen Sie den konkreten Kontext einer Situation: Was ist hier sachlich geboten? Sie suchen nach der vernünftigsten Lösung, die einer kritischen Prüfung standhält und die soziale Basis unseres Zusammenlebens bewahrt. Moral erfordert für Sie keinen Taschenrechner und keine blinden Gebote, sondern kluge, begründbare Einsicht.", class: "result-obj" }
+    };
+
+    function startQuiz() {
+        // NEU: Fisher-Yates Algorithmus mischt die Dilemmata vor jedem Start zufällig durch
+        for (let i = dilemmas.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [dilemmas[i], dilemmas[j]] = [dilemmas[j], dilemmas[i]];
+        }
+
+        document.getElementById('intro-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+        renderQuestion();
+    }
+
+    function getSortCategory(text) {
+        const t = text.toLowerCase().trim();
+        if (t.startsWith('ja') || t.startsWith('ich zahle,') || t.startsWith('ich leite')) return 1;
+        if (t.startsWith('nein') || t.startsWith('ich zahle nicht') || t.startsWith('ich greife nicht ein')) return 3;
+        return 2;
+    }
+
+    function renderQuestion() {
+        const d = dilemmas[currentIndex];
+        pendingOption = null;
+        
+        const progress = ((currentIndex) / dilemmas.length) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+        
+        // Verstecke das Bottom Panel
+        document.getElementById('bottom-panel').classList.remove('active');
+        
+        document.getElementById('dilemma-meta').innerText = `Frage ${currentIndex + 1} von ${dilemmas.length}`;
+        document.getElementById('dilemma-title').innerText = d.title;
+        document.getElementById('dilemma-context').innerText = d.context;
+
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.innerHTML = '';
+        
+        let sortedOptions = d.options
+            .map(opt => ({ ...opt, category: getSortCategory(opt.text), rand: Math.random() }))
+            .sort((a, b) => {
+                if (a.category !== b.category) return a.category - b.category;
+                return a.rand - b.rand;
+            });
+
+        sortedOptions.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn option-btn';
+            btn.id = `opt-btn-${index}`;
+            btn.innerText = opt.text;
+            btn.onclick = () => selectOption(opt, index, sortedOptions.length);
+            optsContainer.appendChild(btn);
+        });
+
+        // NEU: Überspringen-Button hinzufügen
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'btn btn-skip';
+        skipBtn.innerText = 'Ich kann mich nicht entscheiden (Frage überspringen)';
+        skipBtn.onclick = skipQuestion;
+        optsContainer.appendChild(skipBtn);
+    } // Ende von renderQuestion
+    
+
+    function selectOption(opt, selectedIndex, totalOptions) {
+        pendingOption = opt;
+        
+        for (let i = 0; i < totalOptions; i++) {
+            let btn = document.getElementById(`opt-btn-${i}`);
+            if (i === selectedIndex) {
+                btn.classList.add('selected');
+                btn.classList.remove('dimmed');
+            } else {
+                btn.classList.remove('selected');
+                btn.classList.add('dimmed');
+            }
+        }
+        
+        // Zeige die Sticky Bottom Bar
+        document.getElementById('bottom-panel').classList.add('active');
+    }
+    function skipQuestion() {
+        // Pop-up Leiste verstecken, falls sie offen ist
+        document.getElementById('bottom-panel').classList.remove('active');
+        
+        skippedCount++; // Zähler erhöhen
+
+        // In Historie speichern (mit 0 Punkten)
+        userHistory.push({
+            dilemma: dilemmas[currentIndex].title,
+            weight: dilemmas[currentIndex].weight,
+            choice: "Übersprungen / Enthaltung",
+            factor: 0, // 0 = Übersprungen
+            pts: { util: 0, deo: 0, obj: 0 }
+        });
+
+        // Nächste Frage
+        currentIndex++;
+        if (currentIndex < dilemmas.length) {
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            document.getElementById('progress-bar').style.width = '100%';
+            showResults();
+        }
+    }
+
+    function submitAnswer(certaintyFactor) {
+        if (!pendingOption) return;
+
+        // Panel sofort wieder einklappen
+        document.getElementById('bottom-panel').classList.remove('active');
+
+        const weight = dilemmas[currentIndex].weight;
+        const utilPts = pendingOption.scores.util * weight * certaintyFactor;
+        const deoPts = pendingOption.scores.deo * weight * certaintyFactor;
+        const objPts = pendingOption.scores.obj * weight * certaintyFactor;
+
+        scores.util += utilPts;
+        scores.deo += deoPts;
+        scores.obj += objPts;
+
+        if (weight === 3) {
+            tieBreakerScores.util += utilPts;
+            tieBreakerScores.deo += deoPts;
+            tieBreakerScores.obj += objPts;
+        }
+
+        userHistory.push({
+            dilemma: dilemmas[currentIndex].title,
+            weight: weight,
+            choice: pendingOption.text,
+            factor: certaintyFactor,
+            pts: { util: utilPts, deo: deoPts, obj: objPts }
+        });
+
+        // Kurze Pause, damit die Leiste sanft verschwindet, bevor die neue Frage lädt
+        setTimeout(() => {
+            currentIndex++;
+            if (currentIndex < dilemmas.length) {
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                document.getElementById('progress-bar').style.width = '100%';
+                showResults();
+            }
+        }, 300);
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        let maxScore = Math.max(scores.util, scores.deo, scores.obj);
+        let winners = [];
+        if (scores.util === maxScore) winners.push('util');
+        if (scores.deo === maxScore) winners.push('deo');
+        if (scores.obj === maxScore) winners.push('obj');
+
+        let finalWinner = winners[0];
+        
+        if (winners.length > 1) {
+            let maxTieBreaker = -1;
+            winners.forEach(w => {
+                if (tieBreakerScores[w] > maxTieBreaker) {
+                    maxTieBreaker = tieBreakerScores[w];
+                    finalWinner = w;
+                }
+            });
+        }
+
+        const winData = descriptions[finalWinner];
+        const winnerBox = document.getElementById('winner-box');
+        winnerBox.className = `result-box ${winData.class}`;
+        document.getElementById('winner-title').innerText = winData.name;
+        document.getElementById('winner-desc').innerHTML = winData.text;
+        // NEU: Anzeige der übersprungenen Fragen (ohne psychologische Wertung)
+        const skipContainer = document.getElementById('skip-analysis-container');
+        if (skippedCount > 0) {
+            let skipText = `Sie haben <strong>${skippedCount} von ${dilemmas.length}</strong> Fragen übersprungen.`;
+            
+            // Ab 5 übersprungenen Fragen kommt der Warnhinweis zur Aussagekraft:
+            if (skippedCount >= 5) {
+                skipText += "<br><br><em>Hinweis: Da Sie einen größeren Teil der Dilemmata nicht beantwortet haben, ist dieses Ergebnis statistisch weniger aussagekräftig.</em>";
+            }
+
+            skipContainer.innerHTML = `
+                <div style="margin-bottom: 25px; background-color: #f8f9fa; border-left: 4px solid #7f8c8d; padding: 15px; border-radius: 8px;">
+                    <h4 style="margin-bottom: 8px; color: #333; margin-top: 0;">Enthaltungen</h4>
+                    <p style="font-size: 0.9em; color: #555; margin-bottom: 0;">${skipText}</p>
+                </div>
+            `;
+        } else {
+            skipContainer.innerHTML = ""; // Leer, wenn alles beantwortet wurde
+        }
+
+        const barsHTML = [
+            { id: 'util', name: 'Utilitarismus', colorClass: 'util' },
+            { id: 'deo', name: 'Deontologie', colorClass: 'deo' },
+            { id: 'obj', name: 'Ethischer Objektivismus', colorClass: 'obj' }
+        ].map(phil => {
+            const pts = scores[phil.id];
+            const percent = Math.max((pts / maxScore) * 100, 5);
+            return `
+                <div class="score-bar-container">
+                    <div class="score-label">${phil.name}</div>
+                    <div class="score-track">
+                        <div class="score-fill ${phil.colorClass}" style="width: ${percent}%;"></div>
+                    </div>
+                    <div class="score-value">${pts} Pkt.</div>
+                </div>
+            `;
+        }).join('');
+        document.getElementById('score-bars').innerHTML = barsHTML;
+
+        const factorLabels = {
+            0: "Keine (Übersprungen)",
+            1: "1 (Sehr unsicher)",
+            2: "2 (Eher unsicher)",
+            3: "3 (Teils, teils)",
+            4: "4 (Ziemlich sicher)",
+            5: "5 (Völlig überzeugt)"
+        };
+
+        const breakdownHTML = userHistory.map((item, i) => `
+            <div class="breakdown-item">
+                <strong>Frage ${i+1}: ${item.dilemma}</strong> (Trennschärfe: ${item.weight})<br>
+                <em style="color:#555">Gewählt: "${item.choice}"</em><br>
+                <div style="font-size: 0.85em; color: var(--accent); margin-top: 5px;">
+                    <strong>Überzeugungsfaktor:</strong> ${factorLabels[item.factor]}
+                </div>
+                <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+                    <span class="score-badge" style="background:var(--util); padding: 5px 10px; font-size: 0.85em;">Utilitarismus: +${item.pts.util}</span>
+                    <span class="score-badge" style="background:var(--deo); padding: 5px 10px; font-size: 0.85em;">Deontologie: +${item.pts.deo}</span>
+                    <span class="score-badge" style="background:var(--obj); padding: 5px 10px; font-size: 0.85em;">Ethischer Objektivismus: +${item.pts.obj}</span>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('breakdown-list').innerHTML = breakdownHTML;
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        
+        // Lösche altes Chart, falls der Nutzer "Quiz wiederholen" geklickt hat
+        if (radarChartInstance) {
+            radarChartInstance.destroy(); 
+        }
+
+        radarChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Utilitarismus', 'Deontologie', 'Objektivismus'],
+                datasets: [{
+                    label: 'Erreichte Punkte',
+                    data: [scores.util, scores.deo, scores.obj],
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)', // Leichtes Blau als Füllung
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    pointBackgroundColor: ['#e67e22', '#27ae60', '#8e44ad'], // Farben passend zu Philosophien
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: ['#e67e22', '#27ae60', '#8e44ad'],
+                    borderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        suggestedMax: maxScore > 0 ? maxScore + 5 : 10,
+                        ticks: { display: false }, // Versteckt unübersichtliche Zahlenlinien im Netz
+                        pointLabels: {
+                            font: { size: 13, weight: 'bold', family: "'Segoe UI', sans-serif" }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }, // Legende ausblenden
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) { return context.raw + ' Punkte'; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // NEU: Tastatur-Steuerung (Shortcuts 1-5) für Desktop-Nutzer
+    document.addEventListener('keydown', function(event) {
+        // Prüfen, ob das Bottom-Panel (die Skala) überhaupt gerade aktiv/sichtbar ist
+        const panel = document.getElementById('bottom-panel');
+        if (!panel.classList.contains('active')) {
+            return; // Wenn nicht offen, ignoriere Tastendrücke
+        }
+
+        // Prüfen, ob die gedrückte Taste 1, 2, 3, 4 oder 5 ist
+        if (['1', '2', '3', '4', '5'].includes(event.key)) {
+            // Verhindere Standard-Scrollverhalten bei Nummern-Eingabe
+            event.preventDefault(); 
+            
+            // Führe die Antwort-Funktion mit der gedrückten Zahl aus
+            const certaintyFactor = parseInt(event.key);
+            submitAnswer(certaintyFactor);
+        }
+    });
+
+    function resetQuiz() {
+        currentIndex = 0;
+        scores = { util: 0, deo: 0, obj: 0 };
+        tieBreakerScores = { util: 0, deo: 0, obj: 0 };
+        userHistory = [];
+        skippedCount = 0;
+        document.getElementById('bottom-panel').classList.remove('active');
+        
+        document.getElementById('result-screen').classList.remove('active');
+        document.getElementById('intro-screen').classList.add('active');
+        document.getElementById('progress-bar').style.width = '0%';
+    }
+</script>
+
+</body>
+</html>
