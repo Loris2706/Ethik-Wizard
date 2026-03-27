@@ -389,142 +389,307 @@
 <script>
     // JSON Data
     const dilemmas = [
-        {
-          "id": 1, "title": "Die Tochter des Terroristen", "weight": 3,
-          "context": "Angenommen, ein Terrorist hat eine Bombe versteckt, die 1000 Menschen in den Tod reißen würde. Darf man die fünfjährige Tochter des Terroristen foltern, um sein Geständnis zu erzwingen und die Bombe ausfindig zu machen? Man hat guten Grund zur Annahme, dass die Folter der Tochter den Terroristen zur Aussage bewegen wird. Eine andere Alternative ist nicht in Sicht.",
-          "options": [
-            { "text": "Ja, das Überleben einer großen Anzahl von Menschen rechtfertigt in diesem extremen Notfall das Leid eines Einzelnen.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
-            { "text": "Nein, es ist grundsätzlich unzulässig, ein unschuldiges Kind zu quälen, unabhängig von den drohenden Konsequenzen.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Nein, eine solche Tat lässt sich rational nicht rechtfertigen, da sie die logische Basis eines gerechten Zusammenlebens zerstört.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 2, "title": "Der Organ-Raub", "weight": 3,
-          "context": "Stellen Sie sich vor, Sie sind Chirurgin oder Chirurg. Vor Ihnen liegen fünf Patienten: Der eine braucht dringend ein Herz, zwei einen Lungenflügel und zwei eine Niere. Alle fünf haben dieselbe seltene Blutgruppe. Genau in diesem Moment spaziert ein kerngesunder Mann in die Klinik, der die richtige Blutgruppe hat. Sie könnten den jungen Mann schmerzlos töten, seine Organe entnehmen und den fünf Patienten das Leben retten. Ist es moralisch richtig?",
-          "options": [
-            { "text": "Ja, rechnerisch werden durch dieses Opfer mehr Menschenleben erhalten als vernichtet.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
-            { "text": "Nein, ein Mensch darf niemals lediglich als Mittel zur Rettung anderer benutzt werden; das verletzt seine Würde.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Nein, ein Medizinsystem, das Individuen willkürlich opfert, ist in sich widersprüchlich und vernünftig nicht haltbar.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 3, "title": "Die Notapotheke", "weight": 1,
-          "context": "Angenommen, Sie sind sehr arm und leben in einem Staat ohne Grundversicherung. Ihrer Familie geht es gesundheitlich sehr schlecht: Die beiden Kinder leiden an einer schweren Lungenentzündung und brauchen dringend Antibiotika. Sie sehen keinen anderen Weg als den Diebstahl. Ist es moralisch vertretbar, eine Apotheke zu überfallen?",
-          "options": [
-            { "text": "Ja, die physische Gesundheit der Kinder stellt den höheren Wert gegenüber dem finanziellen Schaden dar.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Nein, Diebstahl bleibt ein Verstoß gegen geltende Regeln, die für alle gleichermaßen verbindlich sein müssen.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
-            { "text": "Ja, in diesem speziellen Fall ist die Hilfeleistung die sachlich überzeugendere Verpflichtung gegenüber dem Eigentumsschutz.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 4, "title": "Das entführte Flugzeug", "weight": 3,
-          "context": "Ein Passagierflugzeug wurde von Terroristen entführt und fliegt direkt auf ein bewohntes Hochhaus inmitten einer größeren Stadt zu. Darf man das Flugzeug abschießen?",
-          "options": [
-            { "text": "Ja, man muss den Tod einer weitaus größeren Menschenmenge im Gebäude verhindern.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
-            { "text": "Nein, man darf unschuldige Passagiere nicht aktiv töten, da sie nicht zum bloßen Objekt degradiert werden dürfen.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Ja, da in dieser extremen Situation der Schutz der Bewohner die sachlich überzeugendere Verpflichtung darstellt, die als objektive moralische Wahrheit rationaler Kritik standhält.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 5, "title": "Die Straßensperre", "weight": 1,
-          "context": "Sie transportieren lebensnotwendige Medikamente in einem Bürgerkriegsland. Eine bewaffnete Straßensperre verlangt 1000 Franken für die Durchfahrt. Das Geld fließt an einen kriegstreibenden Diktator. Die Medikamente werden dringend benötigt. Was ist richtig?",
-          "options": [
-            { "text": "Ich zahle, da die direkte Hilfe für die Notleidenden den finanziellen Gewinn des Machthabers überwiegt.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Ich zahle nicht, da ich durch mein Handeln keine korrupten und menschenverachtenden Systeme unterstützen darf.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
-            { "text": "Ich zahle. Die Hilfeleistung ist hier moralisch das wichtigere Gebot. Wer vernünftig denkt, sieht ein, dass der Schutz von Personen über abstrakten Prinzipien steht.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 6, "title": "Das Trolley-Problem", "weight": 3,
-          "context": "Ein außer Kontrolle geratener Zug rast auf fünf Gleisarbeiter zu. Du stehst an einer Weiche und könntest den Zug auf ein Nebengleis umleiten, auf dem jedoch eine einzelne Person steht. Die fünf Arbeiter würden gerettet, die eine Person würde sterben. Was würden Sie tun?",
-          "options": [
-            { "text": "Ich leite den Zug um, um die Anzahl der Opfer statistisch so gering wie möglich zu halten.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Ich greife nicht ein, da ich nicht aktiv über den Tod eines Menschen entscheiden darf, um andere zu retten.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
-            { "text": "Ja, ich lege den Hebel um. Es ist eine objektive Einsicht, dass das Handeln in dieser Notlage vernünftiger ist, da die Rettung der Menschenleben eine sachlich begründete Verpflichtung darstellt.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 7, "title": "Die Brücke", "weight": 3,
-          "context": "Ein führungsloser Zug rast auf fünf Gleisarbeiter zu. Sie stehen auf einer Fußgängerbrücke neben einem sehr schweren Mann. Die einzige Möglichkeit, den Zug zu stoppen, besteht darin, diesen Mann auf die Gleise zu stoßen. Sein Gewicht stoppt den Zug, er stirbt aber. Werden Sie ihn stoßen?",
-          "options": [
-            { "text": "Ja, da fünf gerettete Leben eine objektiv bessere Bilanz darstellen als ein verlorenes Leben.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
-            { "text": "Nein, einen Unbeteiligten aktiv in den Tod zu stoßen, ist eine Grenze, die niemals überschritten werden darf.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Nein, ich lehne das ab. In diesem Fall spricht schlichtweg zu viel gegen das Opfer eines Einzelnen, als dass man es als die richtige Entscheidung ansehen könnte.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 8, "title": "Der lügende Arzt", "weight": 1,
-          "context": "Ein Patient hat eine tödliche Krankheit. Die Wahrheit würde ihn in tiefe Depression stürzen. Eine Lüge könnte ihm ein friedlicheres Ende ermöglichen. Sagen Sie ihm die Wahrheit?",
-          "options": [
-            { "text": "Ja, wenn die Lüge nachweislich zu weniger Leid und einem besseren psychischen Befinden führt.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
-            { "text": "Nein, Wahrhaftigkeit ist eine Pflicht gegenüber dem Patienten, die man nicht nach eigenem Ermessen brechen darf.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Ich sage ihm die Wahrheit, weil er nur so rational über sein verbleibendes Leben entscheiden kann. Es ist sein Leben, nicht meines.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 9, "title": "Steuern und Umverteilung", "weight": 2,
-          "context": "Die Regierung plant Steuererhöhungen für Spitzenverdiener für KI-gestützte Sozialprogramme zur Armutsreduzierung. Kritiker sehen einen Eingriff in das Eigentumsrecht. Ist die Maßnahme gerechtfertigt?",
-          "options": [
-            { "text": "Ja, die signifikante Steigerung des allgemeinen Wohlergehens rechtfertigt den finanziellen Eingriff beim Einzelnen.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Nein, das Recht auf Eigentum darf nicht zur Erreichung sozialer Ziele einfach instrumentalisiert werden.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
-            { "text": "Ja, sofern diese Gerechtigkeit als eine notwendige Bedingung für ein stabiles und vernünftiges Gesellschaftssystem erkannt wird.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 10, "title": "Das Versprechen am Sterbebett", "weight": 1,
-          "context": "Ein sterbender Freund bittet dich, sein Vermögen an eine schädliche Organisation zu spenden. Du hast es versprochen. Nach seinem Tod könntest du das Geld stattdessen einer wohltätigen Organisation geben. Was tun Sie?",
-          "options": [
-            { "text": "Ich nutze es für etwas Gutes, da der reale gesellschaftliche Nutzen wichtiger ist als ein abstraktes Versprechen.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Ich halte das Versprechen, da die Treue zum gegebenen Wort eine moralische Verpflichtung ohne Ausnahme darstellt.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Ich entscheide mich für die gute Organisation, da das Einhalten eines nachweislich schädlichen Versprechens in dieser Situation schlichtweg die falsche Wahl wäre.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 11, "title": "Autonomes Fahrzeug", "weight": 2,
-          "context": "Ethik-Software eines autonomen Fahrzeugs: Bei einem Unfall muss das Auto entscheiden, ob es die Insassen schützt (in Fußgänger steuert) oder die Fußgänger rettet (Insassen gefährdet). Was sollte es tun?",
-          "options": [
-            { "text": "Das System muss die Option wählen, die statistisch die geringste Anzahl an Schwerverletzten zur Folge hat.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Es darf keine Programmierung geben, die aktiv entscheidet, das Leben eines Menschen gegen ein anderes aufzuwiegen.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Das Auto sollte die Fußgänger schützen. Es ist die schlüssigere Wahl, dass diejenigen im Wagen das Risiko tragen und nicht unbeteiligte Personen auf der Straße.", "scores": { "util": 1, "deo": 1, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 12, "title": "Impfpflicht", "weight": 2,
-          "context": "Eine hochansteckende Pandemie bedroht das Gesundheitssystem. Eine staatliche Impfpflicht würde sie beenden, greift aber in die körperliche Selbstbestimmung ein. Sollte sie durchgesetzt werden?",
-          "options": [
-            { "text": "Ja, der Schutz der öffentlichen Gesundheit und die Beendigung der Krise rechtfertigen diesen kollektiven Eingriff.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Nein, die körperliche Selbstbestimmung ist ein Recht, das vom Staat nicht für gemeinschaftliche Zwecke verletzt werden darf.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Ja, ich bin für die Impfpflicht. In einer so kritischen Lage ist der Schutz des Lebens die sachlich richtige Entscheidung, um die Basis für ein sicheres Zusammenleben zu erhalten.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 13, "title": "Gerechte Notlüge in der Diktatur", "weight": 3,
-          "context": "In einer Diktatur versteckst du Verfolgte. Soldaten fragen, ob du jemanden versteckst. Ehrlichkeit bedeutet deren Tod, eine Lüge rettet sie. Belügen Sie die Soldaten?",
-          "options": [
-            { "text": "Ja, das Leben der Unschuldigen zu retten, ist wichtiger als das formale Verbot der Unwahrheit.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Nein, ich sage die Wahrheit. Lügen ist eine Verletzung einer moralischen Grundregel, die man niemals begehen darf.", "scores": { "util": 0, "deo": 3, "obj": 0 } },
-            { "text": "Ja, ich lüge. In dieser extremen Bedrohung ist die Hilfe für die Verfolgten die einzig richtige Entscheidung und stellt hier das sachlich höhere Gut dar.", "scores": { "util": 1, "deo": 0, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 14, "title": "Wissenschaftliche Integrität", "weight": 2,
-          "context": "Sie entdecken als Forscher einen Fehler in einem Medikament. Die Veröffentlichung rettet Leben, würde aber die Firma ruinieren und Sie arbeitslos machen. Veröffentlichen Sie den Fehler?",
-          "options": [
-            { "text": "Ja, die Sicherheit der Patienten weltweit ist wichtiger als mein Arbeitsplatz oder der wirtschaftliche Fortbestand der Firma.", "scores": { "util": 3, "deo": 0, "obj": 0 } },
-            { "text": "Ja, Wahrhaftigkeit in der Forschung ist eine unbedingte Pflicht, die völlig unabhängig von den Folgen für mich gilt.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Ja, da wissenschaftliche Erkenntnisse objektiv wahr sein müssen; alles andere wäre ein Verrat an der Vernunft.", "scores": { "util": 0, "deo": 1, "obj": 3 } }
-          ]
-        },
-        {
-          "id": 15, "title": "KI und Arbeitsplätze", "weight": 2,
-          "context": "Ein Unternehmen ersetzt 200 Mitarbeiter durch KI. Die Produktivität verdoppelt sich, aber die Entlassenen finden schwer neue Arbeit. Ist diese Maßnahme gerechtfertigt?",
-          "options": [
-            { "text": "Ja, die massive Steigerung der Effizienz nützt langfristig der Wettbewerbsfähigkeit und somit der gesamten Ökonomie.", "scores": { "util": 3, "deo": 0, "obj": 1 } },
-            { "text": "Nein, man darf Mitarbeiter nicht als bloße Kostenfaktoren entsorgen, sobald eine Technologie effizienter ist.", "scores": { "util": 0, "deo": 3, "obj": 1 } },
-            { "text": "Nein, ich lehne das ab. Es ist die sachlich überzeugendere Wahrheit, dass technischer Fortschritt nur dann sinnvoll ist, wenn er nicht die soziale Basis unserer Zusammenarbeit zerstört.", "scores": { "util": 1, "deo": 1, "obj": 3 } }
-          ]
-        }
-    ];
+  {
+    "id": 1,
+    "title": "Die Tochter des Terroristen",
+    "weight": 3,
+    "context": "Angenommen, ein Terrorist hat eine Bombe versteckt, die 1000 Menschen in den Tod reißen würde. Darf man die fünfjährige Tochter des Terroristen foltern, um sein Geständnis zu erzwingen und die Bombe ausfindig zu machen? Man hat guten Grund zur Annahme, dass die Folter der Tochter den Terroristen zur Aussage bewegen wird. Eine andere Alternative ist nicht in Sicht.",
+    "options": [
+      {
+        "text": "Ja, weil am Ende nur das Ergebnis zählt und das Überleben von 1000 Menschen schwerer wiegt als die Qual eines Einzelnen.",
+        "scores": { "util": 3, "deo": 0, "obj": 0 }
+      },
+      {
+        "text": "Nein, es ist grundsätzlich unzulässig, ein unschuldiges Kind zu quälen, unabhängig von den drohenden Konsequenzen.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Nein, eine solche Tat lässt sich rational nicht rechtfertigen, da sie die logische Basis eines gerechten Zusammenlebens zerstört.",
+        "scores": { "util": 0, "deo": 1, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Der Organ-Raub",
+    "weight": 3,
+    "context": "Stellen Sie sich vor, Sie sind Chirurgin oder Chirurg. Vor Ihnen liegen fünf Patienten: Der eine braucht dringend ein Herz, zwei einen Lungenflügel und zwei eine Niere. Alle fünf haben dieselbe seltene Blutgruppe. Genau in diesem Moment spaziert ein kerngesunder Mann in die Klinik, der die richtige Blutgruppe hat. Sie könnten den jungen Mann schmerzlos töten, seine Organe entnehmen und den fünf Patienten das Leben retten. Ist es moralisch richtig?",
+    "options": [
+      {
+        "text": "Ja, rechnerisch werden durch dieses Opfer mehr Menschenleben erhalten als vernichtet.",
+        "scores": { "util": 3, "deo": 0, "obj": 0 }
+      },
+      {
+        "text": "Nein, ein Mensch darf niemals lediglich als Mittel zur Rettung anderer benutzt werden; das verletzt seine Würde.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Nein, weil ein Medizinsystem, das willkürlich Menschen opfert, in sich unlogisch ist und jeder vernünftigen Prüfung widerspricht.",
+        "scores": { "util": 0, "deo": 1, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Die Notapotheke",
+    "weight": 1,
+    "context": "Angenommen, Sie sind sehr arm und leben in einem Staat ohne Grundversicherung. Ihrer Familie geht es gesundheitlich sehr schlecht: Die beiden Kinder leiden an einer schweren Lungenentzündung und brauchen dringend Antibiotika. Sie sehen keinen anderen Weg als den Diebstahl. Ist es moralisch vertretbar, eine Apotheke zu überfallen?",
+    "options": [
+      {
+        "text": "Ja, weil die Gesundheit der Kinder einen höheren realen Wert hat als der finanzielle Verlust des Apothekers.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Nein, Diebstahl bleibt ein Verstoß gegen geltende Regeln, die für alle gleichermaßen verbindlich sein müssen.",
+        "scores": { "util": 0, "deo": 3, "obj": 0 }
+      },
+      {
+        "text": "Ja, weil die Hilfeleistung in dieser speziellen Notsituation der sachlich überzeugendere Grund ist als der reine Eigentumsschutz.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Das entführte Flugzeug",
+    "weight": 3,
+    "context": "Ein Passagierflugzeug wurde von Terroristen entführt und fliegt direkt auf ein bewohntes Hochhaus inmitten einer größeren Stadt zu. Darf man das Flugzeug abschießen?",
+    "options": [
+      {
+        "text": "Ja, man muss den Tod einer weitaus größeren Menschenmenge im Gebäude verhindern.",
+        "scores": { "util": 3, "deo": 0, "obj": 0 }
+      },
+      {
+        "text": "Nein, man darf unschuldige Passagiere nicht aktiv töten, da sie nicht zum bloßen Objekt degradiert werden dürfen.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Ja, da in dieser extremen Situation der Schutz der Bewohner die sachlich überzeugendere Verpflichtung darstellt, die als objektive moralische Wahrheit rationaler Kritik standhält.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Die Straßensperre",
+    "weight": 1,
+    "context": "Sie transportieren lebensnotwendige Medikamente in einem Bürgerkriegsland. Eine bewaffnete Straßensperre verlangt 1000 Franken für die Durchfahrt. Das Geld fließt an einen kriegstreibenden Diktator. Die Medikamente werden dringend benötigt. Was ist richtig?",
+    "options": [
+      {
+        "text": "Ich zahle, da die direkte Hilfe für die Notleidenden den finanziellen Gewinn des Machthabers überwiegt.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Ich zahle nicht, da ich durch mein Handeln keine korrupten und menschenverachtenden Systeme unterstützen darf.",
+        "scores": { "util": 0, "deo": 3, "obj": 0 }
+      },
+      {
+        "text": "Ich zahle. Die Hilfeleistung ist hier moralisch das wichtigere Gebot. Wer vernünftig denkt, sieht ein, dass der Schutz von Personen über abstrakten Prinzipien steht.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Das Trolley-Problem",
+    "weight": 3,
+    "context": "Ein außer Kontrolle geratener Zug rast auf fünf Gleisarbeiter zu. Du stehst an einer Weiche und könntest den Zug auf ein Nebengleis umleiten, auf dem jedoch eine einzelne Person steht. Die fünf Arbeiter würden gerettet, die eine Person würde sterben. Was würden Sie tun?",
+    "options": [
+      {
+        "text": "Ich leite den Zug um, um die Anzahl der Opfer statistisch so gering wie möglich zu halten.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Ich greife nicht ein, da ich nicht aktiv über den Tod eines Menschen entscheiden darf, um andere zu retten.",
+        "scores": { "util": 0, "deo": 3, "obj": 0 }
+      },
+      {
+        "text": "Ich leite den Zug um, weil es in diesem Kontext die einsichtigste Entscheidung ist, um so viel Leben wie möglich aktiv zu bewahren.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Die Brücke",
+    "weight": 3,
+    "context": "Ein führungsloser Zug rast auf fünf Gleisarbeiter zu. Sie stehen auf einer Fußgängerbrücke neben einem sehr schweren Mann. Die einzige Möglichkeit, den Zug zu stoppen, besteht darin, diesen Mann auf die Gleise zu stoßen. Sein Gewicht stoppt den Zug, er stirbt aber. Werden Sie ihn stoßen?",
+    "options": [
+      {
+        "text": "Ja, da fünf gerettete Leben eine objektiv bessere Bilanz darstellen als ein verlorenes Leben.",
+        "scores": { "util": 3, "deo": 0, "obj": 0 }
+      },
+      {
+        "text": "Nein, einen Unbeteiligten aktiv in den Tod zu stoßen, ist eine Grenze, die niemals überschritten werden darf.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Nein, ich lehne das ab. In diesem Fall spricht schlichtweg zu viel gegen das Opfer eines Einzelnen, als dass man es als die richtige Entscheidung ansehen könnte.",
+        "scores": { "util": 0, "deo": 1, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Der lügende Arzt",
+    "weight": 1,
+    "context": "Ein Patient hat eine tödliche Krankheit. Die Wahrheit würde ihn in tiefe Depression stürzen. Eine Lüge könnte ihm ein friedlicheres Ende ermöglichen. Sagen Sie ihm die Wahrheit?",
+    "options": [
+      {
+        "text": "Nein, ich lüge, wenn die Lüge am Ende nachweislich für weniger Leid und ein friedlicheres Befinden des Patienten sorgt.",
+        "scores": { "util": 3, "deo": 0, "obj": 0 }
+      },
+      {
+        "text": "Ja, ich sage ihm die Wahrheit, weil Wahrhaftigkeit eine Pflicht ist, die man nicht nach eigenem Belieben für gute Zwecke brechen darf.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Ja, ich sage ihm die Wahrheit, weil er nur so rational über sein verbleibendes Leben entscheiden kann. Es ist sein Leben, nicht meines.",
+        "scores": { "util": 0, "deo": 1, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Steuern und Umverteilung",
+    "weight": 2,
+    "context": "Die Regierung plant Steuererhöhungen für Spitzenverdiener für KI-gestützte Sozialprogramme zur Armutsreduzierung. Kritiker sehen einen Eingriff in das Eigentumsrecht. Ist die Maßnahme gerechtfertigt?",
+    "options": [
+      {
+        "text": "Ja, weil die Verbesserung des allgemeinen Wohlergehens den finanziellen Nachteil für den Einzelnen rechtfertigt.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Nein, das Recht auf Eigentum darf nicht zur Erreichung sozialer Ziele einfach instrumentalisiert werden.",
+        "scores": { "util": 0, "deo": 3, "obj": 0 }
+      },
+      {
+        "text": "Ja, sofern diese Gerechtigkeit als eine notwendige Bedingung für ein stabiles und vernünftiges Gesellschaftssystem erkannt wird.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Das Versprechen am Sterbebett",
+    "weight": 1,
+    "context": "Ein sterbender Freund bittet dich, sein Vermögen an eine schädliche Organisation zu spenden. Du hast es versprochen. Nach seinem Tod könntest du das Geld stattdessen einer wohltätigen Organisation geben. Was tun Sie?",
+    "options": [
+      {
+        "text": "Ich nutze es für etwas Gutes, da der reale gesellschaftliche Nutzen wichtiger ist als ein abstraktes Versprechen.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Ich halte das Versprechen, da die Treue zum gegebenen Wort eine moralische Verpflichtung ohne Ausnahme darstellt.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Ich entscheide mich für die gute Organisation, weil es unvernünftig wäre, einem Versprechen zu folgen, das sachlich gesehen nur Schaden anrichtet.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Autonomes Fahrzeug",
+    "weight": 2,
+    "context": "Ethik-Software eines autonomen Fahrzeugs: Bei einem Unfall muss das Auto entscheiden, ob es die Insassen schützt (in Fußgänger steuert) oder die Fußgänger rettet (Insassen gefährdet). Was sollte es tun?",
+    "options": [
+      {
+        "text": "Das System muss die Option wählen, die statistisch die geringste Anzahl an Schwerverletzten zur Folge hat.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Das System darf nicht darauf programmiert werden, aktiv Leben zu verrechnen; es darf Unbeteiligte nicht zum bloßen Mittel der Schadensbegrenzung machen.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Es ist logischer, dass die Fahrzeuginsassen das Risiko tragen, anstatt völlig unbeteiligte Personen auf der Straße zu opfern.",
+        "scores": { "util": 1, "deo": 1, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "title": "Impfpflicht",
+    "weight": 2,
+    "context": "Eine hochansteckende Pandemie bedroht das Gesundheitssystem. Eine staatliche Impfpflicht würde sie beenden, greift aber in die körperliche Selbstbestimmung ein. Sollte sie durchgesetzt werden?",
+    "options": [
+      {
+        "text": "Ja, weil der kollektive Schutz der Gesundheit und das Ende der Krise den Eingriff in die Freiheit legitimieren.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Nein, die körperliche Selbstbestimmung ist ein Recht, das vom Staat nicht für gemeinschaftliche Zwecke verletzt werden darf.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Ja, ich bin für die Impfpflicht. In einer so kritischen Lage ist der Schutz des Lebens die sachlich richtige Entscheidung, um die Basis für ein sicheres Zusammenleben zu erhalten.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "title": "Gerechte Notlüge in der Diktatur",
+    "weight": 3,
+    "context": "In einer Diktatur versteckst du Verfolgte. Soldaten fragen, ob du jemanden versteckst. Ehrlichkeit bedeutet deren Tod, eine Lüge rettet sie. Belügen Sie die Soldaten?",
+    "options": [
+      {
+        "text": "Ja, weil die Rettung von Leben in der Bilanz viel wichtiger ist als das formale Verbot zu lügen.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Nein, weil Lügen ein Verstoß gegen eine moralische Grundregel ist, die man prinzipiell niemals begehen sollte.",
+        "scores": { "util": 0, "deo": 3, "obj": 0 }
+      },
+      {
+        "text": "Ja, weil in dieser lebensbedrohlichen Situation die Hilfe für die Verfolgten der einzig richtige und vernünftige Grund ist.",
+        "scores": { "util": 1, "deo": 0, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "title": "Wissenschaftliche Integrität",
+    "weight": 2,
+    "context": "Sie entdecken als Forscher einen Fehler in einem Medikament. Die Veröffentlichung rettet Leben, würde aber die Firma ruinieren und Sie arbeitslos machen. Veröffentlichen Sie den Fehler?",
+    "options": [
+      {
+        "text": "Ja, weil die Sicherheit der Patienten weltweit viel schwerer wiegt als mein persönlicher Arbeitsplatz oder der Gewinn der Firma.",
+        "scores": { "util": 3, "deo": 0, "obj": 0 }
+      },
+      {
+        "text": "Ja, Wahrhaftigkeit in der Forschung ist eine unbedingte Pflicht, die völlig unabhängig von den Folgen für mich gilt.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Ja, weil wissenschaftliche Erkenntnisse nur dann Wert besitzen, wenn sie der Wahrheit entsprechen und rationaler Kritik standhalten.",
+        "scores": { "util": 0, "deo": 1, "obj": 3 }
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "title": "KI und Arbeitsplätze",
+    "weight": 2,
+    "context": "Ein Unternehmen ersetzt 200 Mitarbeiter durch KI. Die Produktivität verdoppelt sich, aber die Entlassenen finden schwer neue Arbeit. Ist diese Maßnahme gerechtfertigt?",
+    "options": [
+      {
+        "text": "Ja, weil die Steigerung der Effizienz langfristig der gesamten Wirtschaft und damit der Allgemeinheit nützt.",
+        "scores": { "util": 3, "deo": 0, "obj": 1 }
+      },
+      {
+        "text": "Nein, man darf Mitarbeiter nicht als bloße Kostenfaktoren entsorgen, sobald eine Technologie effizienter ist.",
+        "scores": { "util": 0, "deo": 3, "obj": 1 }
+      },
+      {
+        "text": "Nein, weil technischer Fortschritt vernünftigerweise dem Wohl der Menschen dienen muss, statt ihre soziale Basis zu zerstören.",
+        "scores": { "util": 1, "deo": 1, "obj": 3 }
+      }
+    ]
+  }
+];
 
     let currentIndex = 0;
     let scores = { util: 0, deo: 0, obj: 0 };
