@@ -267,29 +267,58 @@
             justify-content: center;
             gap: 15px;
             margin: 30px 0;
-            flex-wrap: wrap; /* Bricht um, wenn der Bildschirm (Handy) zu klein ist */
+            flex-wrap: wrap; 
         }
 
-        /* Design der runden Buttons */
+        /* Grund-Design aller Buttons (gleiche Größe) */
         .philosophy-btn {
-            background-color: #4A7A96; /* Passend zu deinem blauen Button */
             color: #ffffff;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 10px;
             font-size: 16px;
             font-weight: bold;
-            border-radius: 30px; /* Schön abgerundet */
+            border-radius: 30px; 
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: all 0.2s ease-in-out;
+            
+            /* NEU: Feste Breite, damit alle Buttons exakt gleich groß sind */
+            width: 260px; 
+            text-align: center;
         }
 
+        /* NEU: Spezifische Farben basierend auf dem 'data-type' im HTML */
+
+        /* 1. Utilitarismus (Orange) */
+        .philosophy-btn[data-type="utilitarismus"] {
+            background-color: #d35400; /* Schönes, kräftiges Orange */
+        }
+        .philosophy-btn[data-type="utilitarismus"]:hover {
+            background-color: #a04000;
+        }
+
+        /* 2. Deontologie (Grün) */
+        .philosophy-btn[data-type="deontologie"] {
+            background-color: #27ae60; /* Passendes Grün */
+        }
+        .philosophy-btn[data-type="deontologie"]:hover {
+            background-color: #1e8449;
+        }
+
+        /* 3. Objektivismus (Lila) */
+        .philosophy-btn[data-type="objektivismus"] {
+            background-color: #8e44ad; /* Passendes Lila */
+        }
+        .philosophy-btn[data-type="objektivismus"]:hover {
+            background-color: #6c3483;
+        }
+
+        /* Animation beim Drüberfahren für alle Buttons */
         .philosophy-btn:hover {
-            background-color: #365B70;
-            transform: translateY(-2px); /* Hebt sich beim Drüberfahren leicht an */
+            transform: translateY(-2px); 
         }
 
-        /* Das abgedunkelte Overlay im Hintergrund */
+        /* Das abgedunkelte Overlay im Hintergrund (bleibt gleich) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -307,25 +336,25 @@
 
         .modal-overlay.hidden {
             opacity: 0;
-            pointer-events: none; /* Verhindert Klicks, wenn unsichtbar */
+            pointer-events: none; 
         }
 
-        /* Die weiße Text-Box */
+        /* Die weiße Text-Box (bleibt gleich) */
         .modal-content {
             background-color: #ffffff;
             padding: 30px 40px;
             border-radius: 12px;
             width: 90%;
             max-width: 700px;
-            max-height: 80vh; /* Maximal 80% der Bildschirmhöhe */
-            overflow-y: auto; /* Scrollbalken, falls Text zu lang ist */
+            max-height: 80vh; 
+            overflow-y: auto; 
             position: relative;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             line-height: 1.6;
             color: #333;
         }
 
-        /* Das X zum Schließen */
+        /* Das X zum Schließen (bleibt gleich) */
         .close-modal-btn {
             position: absolute;
             top: 15px;
@@ -341,12 +370,14 @@
             color: #000;
         }
 
+        /* NEU: Zentrierte Überschrift im Fenster */
         #modal-title {
             margin-top: 0;
             color: #2C3E50;
             border-bottom: 2px solid #eee;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            text-align: center; /* <--- Das sorgt für die mittige Ausrichtung */
         }
 
         /* Responsive */
